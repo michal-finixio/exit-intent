@@ -22,16 +22,16 @@ export default {
                 ],
             ],
         }),
-        // uglify()
+        uglify()
     ],
     output: [
         {
-            file: 'dist/exit-intent-module.js',
-            format: 'cjs'
+            file: 'dist/exit-intent-es.min.js',
+            format: 'es'
         },
         {
             name: "ExitIntent",
-            file: 'dist/exit-intent.js',
+            file: 'dist/exit-intent.min.js',
             format: 'iife',
         },
     ]
