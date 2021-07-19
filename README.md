@@ -8,14 +8,30 @@ Loosely based on https://github.com/thebarty/exit-intent with additional functio
 
 ## Behaviour
 
+**SHARED behaviour:**
+
+
+
 **DESKTOP behaviour:**
 
-- trigger intent if mouse leaves body (`mouseleave` event)
-- trigger after user has been inactive for `showAfterInactiveSecondsDesktop` seconds
+- triggers after mouse leaves the body
+  - enabled by default, to disable set `enableOnMouseleaveDesktop` to `false`
+  - uses `mouseleave` event
+- trigger after user has been inactive for a specified amount of time
+  - enabled by default, to disable set `enableOnInactivityDesktop` to `false`
+  - inactive time specified with `showAfterInactiveSecondsDesktop` (default 60 seconds)
 
 **MOBILE behaviour:**
 
-- trigger after user has been inactive for `showAfterInactiveSecondsMobile` seconds
+- triggers after user has been inactive for a specified amount of time
+  - enabled by default, to disable set `enableOnInactivityMobile` to `false`
+  - inactive time specified with `showAfterInactiveSecondsMobile` (default 40 seconds)
+- triggers after window loses focus
+  - disabled by default, to enable set `enableOnBlurMobile` to `true`
+  - uses `blue` event
+- triggers after user scrolls to the bottom of the page
+  - disabled by default, to enable set `enableOnScrollBottomMobile` to `true`
+  - uses `scroll` event
 
 <hr />
 

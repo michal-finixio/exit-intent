@@ -9,6 +9,11 @@ const defaultOptions = {
   showAfterInactiveSecondsDesktop: 60,
   showAfterInactiveSecondsMobile: 40,
   showAgainAfterSeconds: 10,
+  enableOnInactivityDesktop: true,
+  enableOnInactivityMobile: true,
+  enableOnMouseleaveDesktop: true,
+  enableOnBlurMobile: false,
+  enableOnScrollBottomMobile: false,
   onExitIntent: () => {
     console.log('onExitIntent action');
   }
@@ -16,25 +21,34 @@ const defaultOptions = {
 
 const isDesktop = !isTouchDevice();
 
-const resetTimeoutDesktopTriggers = ['scroll', 'mousemove', 'wheel'];
-const resetTimeoutMobileTriggers = ['touchstart', 'touchend', 'touchmove'];
+const resetTimeoutTriggersDesktop = ['scroll', 'mousemove', 'wheel'];
+const resetTimeoutTriggersMobile = ['touchstart', 'touchend', 'touchmove'];
 
+let displayss = 10;
+
+// TODO: split that into smaller parts
 export default function ExitIntent(options = {}) {
+  displayss += 1;
   const config = { ...defaultOptions, ...options };
 
   let displays = 0;
-  let onMouseleaveHandler;
+  const target = isDesktop ? document.body : window;
+
+  let onMouseleaveHandlerDesktop;
+  let onBlurHandlerMobile;
+  let onScrollBottomHandlerMobile;
 
   // inactivity trigger state
+  const inactivityEnabled = isDesktop
+    ? config.enableOnInactivityDesktop
+    : config.enableOnInactivityMobile;
   const timeoutOnDevice = isDesktop
     ? config.showAfterInactiveSecondsDesktop
     : config.showAfterInactiveSecondsMobile;
   const resetTimerTriggers = isDesktop
-    ? resetTimeoutDesktopTriggers
-    : resetTimeoutMobileTriggers;
-  const target = isDesktop ? document.body : window;
+    ? resetTimeoutTriggersDesktop
+    : resetTimeoutTriggersMobile;
   const resetTimeoutListeners = [];
-
   let inactivityTimer;
 
   const log = (...args) => {
@@ -61,24 +75,52 @@ export default function ExitIntent(options = {}) {
   });
 
   // register exit intent triggers
+  // TODO - maybe extract this, split
   if (isDesktop) {
-    log('register mouseleave trigger for desktop');
-    onMouseleaveHandler = throttle(
-      (e) => {
-        if (!(e instanceof MouseEvent)) return;
-        log('mouseleave trigger');
-        displayIntent();
-      },
-      config.exitIntentThrottle,
-    );
-    target.addEventListener( 'mouseleave', onMouseleaveHandler, false);
+    if (config.enableOnMouseleaveDesktop) {
+      log('register mouseleave trigger for desktop');
+      onMouseleaveHandlerDesktop = throttle(
+        (e) => {
+          if (!(e instanceof MouseEvent)) return;
+          log('mouseleave trigger');
+          displayIntent();
+        },
+        config.exitIntentThrottle,
+      );
+      target.addEventListener('mouseleave', onMouseleaveHandlerDesktop, false);
+    }
   } else {
-    // todo
+    if (config.enableOnBlurMobile) {
+      log('register on blur trigger for mobile');
+      onBlurHandlerMobile = throttle(
+        () => {
+          log('blur trigger');
+          displayIntent();
+        },
+        config.exitIntentThrottle,
+      );
+      target.addEventListener('blur', onBlurHandlerMobile, false);
+    }
+    if (config.enableOnScrollBottomMobile) {
+      onScrollBottomHandlerMobile = throttle(
+        () => {
+          const documentHeight = document.body.scrollHeight;
+          const currentScroll = window.scrollY + window.innerHeight;
+  
+          if (currentScroll >= documentHeight) {
+            log('scroll to bottom trigger');
+            displayIntent();
+          }
+        },
+        config.eventThrottle
+      );
+      target.addEventListener('scroll', onScrollBottomHandlerMobile, false);
+    }
   }
 
-  // restart inactivity timer
+  // restart inactivity timer on activity
   const restartTimer = () => {
-    if (typeof timeoutOnDevice === 'undefined') {
+    if (inactivityEnabled && typeof timeoutOnDevice === 'undefined') {
       log('exit intent trigger by inactivity is disabled');
       return;
     }
@@ -92,9 +134,8 @@ export default function ExitIntent(options = {}) {
     }, timeoutOnDevice * 1000);
   }
 
-  const onEvent = throttle(restartTimer, config.eventThrottle);
-
   // register events restarting inactivity timer
+  const onEvent = throttle(restartTimer, config.eventThrottle);
   resetTimerTriggers.forEach(event => {
     log('registering event for restartTimer', { event, target });
     target.addEventListener(event, onEvent, false);
@@ -104,8 +145,14 @@ export default function ExitIntent(options = {}) {
   // cleanup function
   const removeEvents = () => {
     log(`cleanup after ${displays} displays`);
-    if (onMouseleaveHandler) {
-      target.removeEventListener('mouseleave', onMouseleaveHandler);
+    if (onMouseleaveHandlerDesktop) {
+      target.removeEventListener('mouseleave', onMouseleaveHandlerDesktop);
+    }
+    if (onBlurHandlerMobile) {
+      target.removeEventListener('blur', onBlurHandlerMobile);
+    }
+    if (onScrollBottomHandlerMobile) {
+      target.removeEventListener('scroll', onScrollBottomHandlerMobile);
     }
     if (inactivityTimer !== undefined) {
       window.clearTimeout(inactivityTimer);
@@ -118,6 +165,7 @@ export default function ExitIntent(options = {}) {
 
   // start initial inactivity timer
   restartTimer();
+  console.log('d', displayss)
 
   // return cleanup function
   return removeEvents;

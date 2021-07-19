@@ -12,6 +12,9 @@ const EXIT_INTENT_OPTIONS = {
     showAfterInactiveSecondsMobile: 10,    // default 40
     showAgainAfterSeconds: 5,              // default 10
     debug: true,                           // default false
+    enableOnMouseleaveDesktop: true,       // default true
+    enableOnBlurMobile: true,              // default false
+    enableOnScrollBottomMobile: true,      // default false
 };
 
 
@@ -33,33 +36,35 @@ app.get('/', async (req, res) => {
                         text-align: center;
                     }
                     code {
-                        white-space: pre;
+                        white-space: pre-wrap;
                     }
                 </style>
             </head>
             <body>
-                <h1>Exit intent test</h1>
-                <p>
-                    Adjust <b>test-server/EXIT_INTENT_OPTIONS</b> to test different <b>ExitIntent</b> configurations.
-                </p>
-                <p>
-                    Check devtools console for debug info.
-                </p>
-                <p>
-                    You can also initialise ExitEvent manually in the console by pasting:
-                </p>
-                <code>
-                    removeExitIntent();
-                    removeExitIntent = ExitIntent({
-                        maxDisplays: 99999,
-                        exitIntentThrottle: 100,
-                        showAfterInactiveSecondsDesktop: 10,
-                        showAfterInactiveSecondsMobile: 10,
-                        showAgainAfterSeconds: 5,
-                        debug: true,
-                        onExitIntent: () => alert('Exit Intent callback!'),  
-                    });
-                </code>
+                <div style="height: 2000px">
+                    <h1>Exit intent test</h1>
+                    <p>
+                        Adjust <b>test-server/EXIT_INTENT_OPTIONS</b> to test different <b>ExitIntent</b> configurations.
+                    </p>
+                    <p>
+                        Check devtools console for debug info.
+                    </p>
+                    <p>
+                        You can also initialise ExitEvent manually in the console by pasting:
+                    </p>
+                    <code>
+                        removeExitIntent();
+                        removeExitIntent = ExitIntent({
+                            maxDisplays: 99999,
+                            exitIntentThrottle: 100,
+                            showAfterInactiveSecondsDesktop: 10,
+                            showAfterInactiveSecondsMobile: 10,
+                            showAgainAfterSeconds: 5,
+                            debug: true,
+                            onExitIntent: () => alert('Exit Intent callback!'),  
+                        });
+                    </code>
+                </div>
                 <script src="exit-intent.min.js"></script>
                 <script>
                     var removeExitIntent = ExitIntent(${JSON.stringify(EXIT_INTENT_OPTIONS)});
