@@ -17,7 +17,7 @@ const defaultOptions = {
   scrollBottomOffset: 200,
   enableOnScrollTopMobile: false,
   onExitIntent: (cause) => {
-    alert(`onExitIntent action - ${cause}`);
+    console.log(`onExitIntent action - ${cause}`);
   }
 };
 

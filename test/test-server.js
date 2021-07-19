@@ -13,7 +13,7 @@ const EXIT_INTENT_OPTIONS = {
     showAfterInactiveSecondsMobile: 30,    // default 40
     showAgainAfterSeconds: 5,              // default 10
     debug: true,                           // default false
-    enableOnMouseleaveDesktop: false,       // default true
+    enableOnMouseleaveDesktop: true,       // default true
     enableOnBlurMobile: false,              // default false
     enableOnScrollBottomMobile: false,      // default false
     enableOnScrollTopMobile: true,         // default false
