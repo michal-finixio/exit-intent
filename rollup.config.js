@@ -3,9 +3,8 @@ import babel from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import { uglify } from "rollup-plugin-uglify";
 
-export default {
-    input: 'src/ExitIntent.js',
-    plugins: [
+export default () => {
+    const plugins = [
         resolve(),
         commonjs(),
         babel({
@@ -23,16 +22,24 @@ export default {
             ],
         }),
         uglify()
-    ],
-    output: [
-        {
-            file: 'dist/exit-intent-es.min.js',
-            format: 'es'
-        },
-        {
-            name: "ExitIntent",
-            file: 'dist/exit-intent.min.js',
-            format: 'iife',
-        },
-    ]
-}
+    ];
+    if (process.env.APP_ENV === 'development') {
+        plugins.pop();
+    }
+
+    return {
+        input: 'src/ExitIntent.js',
+        plugins,
+        output: [
+            {
+                file: 'dist/exit-intent.min.es.js',
+                format: 'es'
+            },
+            {
+                name: "ExitIntent",
+                file: 'dist/exit-intent.min.js',
+                format: 'iife',
+            },
+        ]
+    };
+};
