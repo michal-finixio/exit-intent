@@ -7,17 +7,22 @@ const PORT = process.env.PORT || 3000;
 // Change options to change bahaviour
 // onExitIntent callback can be overridden in devtools console with manual initialisation
 const EXIT_INTENT_OPTIONS = {
-    maxDisplays: 99999,                    // default 99999
-    exitIntentThrottle: 100,               // default 200
-    showAfterInactiveSecondsDesktop: 30,   // default 60
-    showAfterInactiveSecondsMobile: 30,    // default 40
-    showAgainAfterSeconds: 5,              // default 10
+    maxDisplays: 99999,                     // default 99999
+    showAgainAfterSeconds: 10,               // default 30
+    showAfterInactiveSecondsDesktop: 30,    // default 60
+    showAfterInactiveSecondsMobile: 30,     // default 40
+    enableOnInactivityDesktop: true,        // default true
+    enableOnInactivityMobile: true,         // default true
+    enableOnMouseleaveDesktop: true,        // default true
+    enableOnBlurMobile: true,               // default false
+    enableOnScrollBottomMobile: true,      // default false
+    scrollBottomOffset: 200,                // default 200
+    enableOnFastScrollTopMobile: true,     // default false
+    scrollTopStartingArticleDepth: 0.5,     // default 0.5
+    scrollTopSecondsToScroll: 2,            // default 2
+    eventThrottle: 200,                     // default 200
     debug: true,                           // default false
-    enableOnMouseleaveDesktop: true,       // default true
-    enableOnBlurMobile: false,              // default false
-    enableOnScrollBottomMobile: false,      // default false
-    enableOnScrollTopMobile: true,         // default false
-    scrollTopSpeedThreshold: 2000,         // default true
+
 };
 
 const app = express();

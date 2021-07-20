@@ -1,6 +1,10 @@
 # Exit Intent (Desktop + Mobile)
 
-Exit intent detection script, including support of mobile and desktop.
+Exit intent detection script, including support of various triggers on mobile and desktop.  
+
+Builds with `rollup` and `babel` to an IIFE to be included in the document. (`./dist/exit-intent.min.js`).
+
+Uses `is-touch-device` (https://www.npmjs.com/package/is-touch-device) to distinguish between desktop and mobile and `lodash-throttle` (https://www.npmjs.com/package/lodash.throttle) for event throttling.
 
 Loosely based on https://github.com/thebarty/exit-intent with additional functionality.
 
@@ -10,7 +14,8 @@ Loosely based on https://github.com/thebarty/exit-intent with additional functio
 
 **SHARED behaviour:**
 
-
+- maximum number of displays can be set, beyond which exit intent will not be fired anymore
+- time that has to pass until next exit intent can fire can be set with `showAgainAfterSeconds` not to bug user too much
 
 **DESKTOP behaviour:**
 
@@ -32,6 +37,9 @@ Loosely based on https://github.com/thebarty/exit-intent with additional functio
 - triggers after user scrolls to the bottom of the page
   - disabled by default, to enable set `enableOnScrollBottomMobile` to `true`
   - uses `scroll` event
+- triggers after user scrolls fast to the top of the page (address bar)
+  - disabled by default, to enable set `enableOnFastScrollTopMobile` to `true`
+  - triggers, after user scrolls towards address bar from beyond `scrollTopStartingArticleDepth` point and reaches top of the article within `scrollTopSecondsToScroll` seconds
 
 <hr />
 
@@ -48,23 +56,23 @@ Include `dist/exit-intent.min.js` in your site:
 ```
 
 You should be able to access `ExitIntent` within page context. To initialise, call it with your parameters.  
-If parameters are not provided, default will be used.
+If parameters are not provided, their default value will be used. 
 
 ```js
 var removeExitIntent = ExitIntent({
-  maxDisplays: 99999,                    // default 99999
+  maxDisplays: 3,                        // default 99999
+  showAgainAfterSeconds: 60,             // default 30
   showAfterInactiveSecondsDesktop: 60,   // default 60
   showAfterInactiveSecondsMobile: 40,    // default 40
-  showAgainAfterSeconds: 10,             // default 10
-  exitIntentThrottle: 200,               // default 200
-  debug: false,                          // default false
+  showAgainAfterSeconds: 10,             // default 40
   onExitIntent: () => {                  // default no-op function
-    console.log('exit-intent triggered');
+    alert('Show a modal');
   },
+  // other parameters...
 });
 ```
 
-If in some case exit intent is no longer desired, to clean up call `removeExitIntent`.
+If in some case exit intent is no longer desired, to clean up call cleanup function (`removeExitIntent`).
 
 ```js
 removeExitIntent();
@@ -76,19 +84,45 @@ Not yet implemented
 
 <hr />
 
-## Options
+## Configuration
 
-`maxDisplays` (default 99999) - maximum number of times exit intent can be triggered.
+### Basic:
 
 `onExitIntent` (default no-op function) - function to call when an exit intent has been detected.
 
-`showAfterInactiveSecondsDesktop` (default 60 seconds) - inactivity period after which exit intent function is triggered on desktop. Pass `undefined` to disable.
+`showAgainAfterSeconds` (default 30) - if exit intend was triggered, wait for this period until it is possible to trigger it again. Useful not to annoy the user.
 
-`showAfterInactiveSecondsMobile` (default 40 seconds) - inactivity period after which exit intent function is triggered on mobile. Pass `undefined` to disable.
+`maxDisplays` (default 99999) - maximum number of times exit intent can be triggered.
 
-`showAgainAfterSeconds` (default 10 seconds) - if exit-intend was triggered, wait for this period until it is possible to trigger it again.
+### Enabling specific triggers:
 
-`exitIntentThrottle` (default 200) - event throttle in milliseconds. Period of throttling time between event trigger and exit intent callback.
+`enableOnInactivityDesktop` (default true) - flag to enable inactivity trigger on desktop.
+
+`showAfterInactiveSecondsDesktop` (default 60) - inactivity period after which exit intent function is triggered on desktop.
+
+`enableOnInactivityMobile` (default true) - flag to enable inactivity trigger on mobile.
+
+`showAfterInactiveSecondsMobile` (default 40) - inactivity period after which exit intent function is triggered on mobile.
+
+`enableOnMouseleaveDesktop` (default trye) - flag to enable on mouseleave trigger on desktop. When mouse leaves the document, exit intent will be triggered.
+
+`enableOnBlurMobile` (default false) - flag to enable on blur trigger on mobile. When window loses focus, exit intent will be triggered.
+
+`enableOnScrollBottomMobile` (default false) - flag to enable on scroll to bottom of the page trigger on mobile.
+
+`scrollBottomOffsetPx` (default 200) - offset of pixels, how far from the bottom exit intent will be triggered when scrolling to the bottom.
+
+`enableOnFastScrollTopMobile` (default false) - flag to enable on fast scroll to top trigger on mobile. When user scrolls fast towards the top, exit intent will be triggered.
+
+`scrollTopStartingArticleDepth` (default 0.5) - Article depth, that scrolling from towards top (address bar) can trigger the intent. Between 0.1 and 1.
+
+`scrollTopSecondsToScroll` (default 2) - Time within which scrolling to top must happen to trigger the exit intent.
+
+### Technical:
+
+`debug` (default false) - flag to enable debug logging of the tool.
+
+`eventThrottle` (default 200) - event throttle in milliseconds. Period of throttling time between event trigger and exit intent callback.
 
 <hr />
 

@@ -2,27 +2,29 @@ import throttle from 'lodash.throttle';
 import isTouchDevice from 'is-touch-device';
 
 const defaultOptions = {
-  debug: false,
   maxDisplays: 99999,
-  exitIntentThrottle: 200,
-  eventThrottle: 200,
+  showAgainAfterSeconds: 30,
   showAfterInactiveSecondsDesktop: 60,
   showAfterInactiveSecondsMobile: 40,
-  showAgainAfterSeconds: 10,
   enableOnInactivityDesktop: true,
   enableOnInactivityMobile: true,
   enableOnMouseleaveDesktop: true,
   enableOnBlurMobile: false,
   enableOnScrollBottomMobile: false,
-  scrollBottomOffset: 200,
-  enableOnScrollTopMobile: false,
-  onExitIntent: (cause) => {
-    console.log(`onExitIntent action - ${cause}`);
+  scrollBottomOffsetPx: 200,
+  enableOnFastScrollTopMobile: false,
+  scrollTopStartingArticleDepth: 0.5,
+  scrollTopSecondsToScroll: 2,
+  eventThrottle: 200,
+  debug: false,
+  onExitIntent: () => {
+    console.log('onExitIntent action');
   }
 };
 
 const isDesktop = !isTouchDevice();
 const target = isDesktop ? document.body : window;
+const documentHeight = document.body.scrollHeight;
 
 const resetTimeoutTriggersDesktop = ['scroll', 'mousemove', 'wheel'];
 const resetTimeoutTriggersMobile = ['touchstart', 'touchend', 'touchmove'];
@@ -81,7 +83,7 @@ export default function ExitIntent(options = {}) {
           log('mouseleave trigger');
           displayIntent();
         },
-        config.exitIntentThrottle,
+        config.eventThrottle,
       );
       target.addEventListener('mouseleave', handler, false);
       listeners.push({ event: 'mouseleave', handler, target });
@@ -95,7 +97,7 @@ export default function ExitIntent(options = {}) {
           log('blur trigger');
           displayIntent();
         },
-        config.exitIntentThrottle,
+        config.eventThrottle,
       );
       target.addEventListener('blur', handler, false);
       listeners.push({ event: 'blur', handler, target });
@@ -104,32 +106,33 @@ export default function ExitIntent(options = {}) {
       const handler = throttle(
         () => {
           setTimeout(() => {
-            const documentHeight = document.body.scrollHeight;
             const currentScroll = window.innerHeight + window.scrollY;
             
-            if (currentScroll + config.scrollBottomOffset >= documentHeight) {
+            if (currentScroll + config.scrollBottomOffsetPx >= documentHeight) {
               log('scroll to bottom trigger');
               displayIntent();
             }
-          }, 50);
+          }, 100);
         },
         config.eventThrottle
       );
       target.addEventListener('scroll', handler, false);
       listeners.push({ event: 'scroll', handler, target });
     }
-    if (config.enableOnScrollTopMobile) {
-      const docMiddle = document.body.scrollHeight / 2;
+    if (config.enableOnFastScrollTopMobile) {
+      const docThresholdHeight = documentHeight * config.scrollTopStartingArticleDepth;
       let lastTouchTimeStamp = 0;
-
       const touchstartHandler = (e) => {
-        if (window.innerHeight + window.scrollY > docMiddle) {
+        if (window.innerHeight + window.scrollY > docThresholdHeight) {
           lastTouchTimeStamp = e.timeStamp;
         }
       };
       const touchendHandler = (e) => {
         setTimeout(() => {
-          if (window.scrollY < 100 && (e.timeStamp - lastTouchTimeStamp) < 2000) {
+          if (
+            window.scrollY < 100
+              && (e.timeStamp - lastTouchTimeStamp) < config.scrollTopSecondsToScroll * 1000
+          ) {
             log('fast scroll to top trigger');
             displayIntent();
           }
