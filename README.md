@@ -32,12 +32,15 @@ Loosely based on https://github.com/thebarty/exit-intent with additional functio
   - enabled by default, to disable set `enableOnInactivityMobile` to `false`
   - inactive time specified with `showAfterInactiveSecondsMobile` (default 40 seconds)
 - triggers after window loses focus
-  - disabled by default, to enable set `enableOnBlurMobile` to `true`
+  - enabled by default, to enable set `enableOnBlurMobile` to `false`
   - uses `blue` event
 - triggers after user scrolls to the bottom of the page
-  - disabled by default, to enable set `enableOnScrollBottomMobile` to `true`
+  - enabled automatically from height specified by `enableOnScrollBottomMobile` param
+  - default `enableOnScrollBottomMobile` value is set to 2500 - to disable, pass `0` or `undefined`
   - uses `scroll` event
 - triggers after user scrolls fast to the top of the page (address bar)
+  - enabled automatically from height specified by `enableOnFastScrollTopMobile` param
+  - default `enableOnFastScrollTopMobile` value is set to 2500 - to disable, pass `0` or `undefined`
   - disabled by default, to enable set `enableOnFastScrollTopMobile` to `true`
   - triggers, after user scrolls towards address bar from beyond `scrollTopStartingArticleDepth` point and reaches top of the article within `scrollTopSecondsToScroll` seconds
 
@@ -56,7 +59,8 @@ Include `dist/exit-intent.min.js` in your site:
 ```
 
 You should be able to access `ExitIntent` within page context. To initialise, call it with your parameters.  
-If parameters are not provided, their default value will be used. 
+If parameters are not provided, their default value will be used.  
+`onExitIntent` callback needs to be specified, or script will have no effect.
 
 ```js
 var removeExitIntent = ExitIntent({
@@ -64,7 +68,6 @@ var removeExitIntent = ExitIntent({
   showAgainAfterSeconds: 60,             // default 30
   showAfterInactiveSecondsDesktop: 60,   // default 60
   showAfterInactiveSecondsMobile: 40,    // default 40
-  showAgainAfterSeconds: 10,             // default 30
   onExitIntent: () => {                  // default no-op function
     alert('Show a modal');
   },
@@ -106,13 +109,13 @@ Not yet implemented
 
 `enableOnMouseleaveDesktop` (default trye) - flag to enable on mouseleave trigger on desktop. When mouse leaves the document, exit intent will be triggered.
 
-`enableOnBlurMobile` (default false) - flag to enable on blur trigger on mobile. When window loses focus, exit intent will be triggered.
+`enableOnBlurMobile` (default true) - flag to enable on blur trigger on mobile. When window loses focus, exit intent will be triggered.
 
-`enableOnScrollBottomMobile` (default false) - flag to enable on scroll to bottom of the page trigger on mobile.
+`enableOnScrollBottomMobile` (default 2500) - minimum document height to enable on scroll to bottom of the page trigger on mobile. Pass 0 or `undefined` to disable.
 
 `scrollBottomOffsetPx` (default 200) - offset of pixels, how far from the bottom exit intent will be triggered when scrolling to the bottom.
 
-`enableOnFastScrollTopMobile` (default false) - flag to enable on fast scroll to top trigger on mobile. When user scrolls fast towards the top, exit intent will be triggered.
+`enableOnFastScrollTopMobile` (default 2500) - minimum document height to enable on fast scroll to top trigger on mobile. When user scrolls fast towards the top, exit intent will be triggered. Pass 0 or `undefined` to disable.
 
 `scrollTopStartingArticleDepth` (default 0.5) - Article depth, that scrolling from towards top (address bar) can trigger the intent. Between 0.1 and 1.
 

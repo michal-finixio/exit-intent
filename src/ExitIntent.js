@@ -9,10 +9,10 @@ const defaultOptions = {
   enableOnInactivityDesktop: true,
   enableOnInactivityMobile: true,
   enableOnMouseleaveDesktop: true,
-  enableOnBlurMobile: false,
-  enableOnScrollBottomMobile: false,
+  enableOnBlurMobile: true,
+  enableOnScrollBottomMobile: 2500,
   scrollBottomOffsetPx: 200,
-  enableOnFastScrollTopMobile: false,
+  enableOnFastScrollTopMobile: 2500,
   scrollTopStartingArticleDepth: 0.5,
   scrollTopSecondsToScroll: 2,
   eventThrottle: 200,
@@ -29,6 +29,9 @@ const documentHeight = document.body.scrollHeight;
 const resetTimeoutTriggersDesktop = ['scroll', 'mousemove', 'wheel'];
 const resetTimeoutTriggersMobile = ['touchstart', 'touchend', 'touchmove'];
 
+const scrollEventEnabled = (minHeight) => {
+  return !!minHeight && documentHeight > minHeight;
+}
 
 // TODO: split that into smaller parts
 export default function ExitIntent(options = {}) {
@@ -88,8 +91,8 @@ export default function ExitIntent(options = {}) {
       target.addEventListener('mouseleave', handler, false);
       listeners.push({ event: 'mouseleave', handler, target });
     }
-  } else {
-    // mobile triggers
+  }
+  if (!isDesktop) {
     if (config.enableOnBlurMobile) {
       log('register on blur trigger for mobile');
       const handler = throttle(
@@ -102,12 +105,13 @@ export default function ExitIntent(options = {}) {
       target.addEventListener('blur', handler, false);
       listeners.push({ event: 'blur', handler, target });
     }
-    if (config.enableOnScrollBottomMobile) {
+    if (scrollEventEnabled(config.enableOnScrollBottomMobile)) {
+      log('register on scroll bottom trigger for mobile');
       const handler = throttle(
         () => {
           setTimeout(() => {
             const currentScroll = window.innerHeight + window.scrollY;
-            
+
             if (currentScroll + config.scrollBottomOffsetPx >= documentHeight) {
               log('scroll to bottom trigger');
               displayIntent();
@@ -119,7 +123,8 @@ export default function ExitIntent(options = {}) {
       target.addEventListener('scroll', handler, false);
       listeners.push({ event: 'scroll', handler, target });
     }
-    if (config.enableOnFastScrollTopMobile) {
+    if (scrollEventEnabled(config.enableOnFastScrollTopMobile)) {
+      log('register on scroll top trigger for mobile');
       const docThresholdHeight = documentHeight * config.scrollTopStartingArticleDepth;
       let lastTouchTimeStamp = 0;
       const touchstartHandler = (e) => {
@@ -131,7 +136,7 @@ export default function ExitIntent(options = {}) {
         setTimeout(() => {
           if (
             window.scrollY < 100
-              && (e.timeStamp - lastTouchTimeStamp) < config.scrollTopSecondsToScroll * 1000
+            && (e.timeStamp - lastTouchTimeStamp) < config.scrollTopSecondsToScroll * 1000
           ) {
             log('fast scroll to top trigger');
             displayIntent();
