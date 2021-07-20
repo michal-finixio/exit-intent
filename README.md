@@ -64,7 +64,7 @@ var removeExitIntent = ExitIntent({
   showAgainAfterSeconds: 60,             // default 30
   showAfterInactiveSecondsDesktop: 60,   // default 60
   showAfterInactiveSecondsMobile: 40,    // default 40
-  showAgainAfterSeconds: 10,             // default 40
+  showAgainAfterSeconds: 10,             // default 30
   onExitIntent: () => {                  // default no-op function
     alert('Show a modal');
   },
@@ -122,7 +122,7 @@ Not yet implemented
 
 `debug` (default false) - flag to enable debug logging of the tool.
 
-`eventThrottle` (default 200) - event throttle in milliseconds. Period of throttling time between event trigger and exit intent callback.
+`eventThrottle` (default 200) - event throttle in milliseconds. Period of throttling time between event trigger and callback.
 
 <hr />
 
